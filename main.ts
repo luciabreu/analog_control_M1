@@ -8,15 +8,15 @@ function goNavigate () {
 }
 function screenDirection (instruction: number) {
     if (instruction == 0) {
-        basic.showIcon(IconNames.Happy)
+        radio.sendValue("fs", 0)
     } else if (instruction == 1) {
-        basic.showArrow(ArrowNames.North)
+        radio.sendValue("fs", straightSpeed)
     } else if (instruction == 2) {
-        basic.showArrow(ArrowNames.South)
+        radio.sendValue("fs", -1 * straightSpeed)
     } else if (instruction == 3) {
-        basic.showArrow(ArrowNames.West)
+        radio.sendValue("dir", -1 * maxSteeringSpeed)
     } else {
-        basic.showArrow(ArrowNames.East)
+        radio.sendValue("dir", maxSteeringSpeed)
     }
 }
 let steeringSpeed = 0
@@ -25,15 +25,15 @@ let instruction = 0
 let lista: number[] = []
 let playIndex = 0
 let isPlaying = false
+let maxSteeringSpeed = 0
+let straightSpeed = 0
 let isStopped = false
 basic.showIcon(IconNames.Diamond)
 isStopped = true
-let straightSpeed = 30
-let maxSteeringSpeed = 50
+straightSpeed = 30
+maxSteeringSpeed = 50
 let steeringDeadzone = 20
-radio.setGroup(25)
 radio.setGroup(31)
-radio.setGroup(20)
 WSJoyStick.JoyStickInit()
 basic.forever(function () {
     if (isPlaying) {
@@ -56,11 +56,10 @@ basic.forever(function () {
             instruction = 0
         }
     }
-    screenDirection(instruction)
     if (isRecording) {
         lista.push(instruction)
     } else {
-        radio.sendNumber(instruction)
+        screenDirection(instruction)
     }
     if (WSJoyStick.Listen_Key(KEY.A) && isRecording) {
         isRecording = false
