@@ -1,0 +1,22 @@
+{
+    "name": "analog_control_final",
+    "description": "",
+    "dependencies": {
+        "core": "*",
+        "radio": "*",
+        "WSJoyStick": "github:waveshare/joystick#e090d95944ae0fc614f708461498dbf875ef1243"
+    },
+    "files": [
+        "main.blocks",
+        "main.ts",
+        "README.md",
+        "main.py"
+    ],
+    "testFiles": [
+        "test.ts"
+    ],
+    "supportedTargets": [
+        "microbit"
+    ],
+    "preferredEditor": "blocksprj"
+}
