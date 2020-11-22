@@ -25,21 +25,29 @@ function updateScreen () {
     }
 }
 function pushToRecordingList (instruction: number) {
-    for (let index = 0; index < recordingCycles; index++) {
+    if (instruction > 2) {
+        recordingCyclesTemp = recordingCyclesTurning
+    } else {
+        recordingCyclesTemp = recordingCyclesForward
+    }
+    for (let index = 0; index < recordingCyclesTemp; index++) {
         recordingList.push(instruction)
     }
 }
 function translateInstruction (instruction: number) {
-    if (instruction == 0) {
-        radio.sendValue("fs", 0)
-    } else if (instruction == 1) {
-        radio.sendValue("fs", 40)
-    } else if (instruction == 2) {
-        radio.sendValue("fs", -1 * 40)
-    } else if (instruction == 3) {
-        radio.sendValue("dir", -1 * 40)
-    } else {
-        radio.sendValue("dir", 40)
+    if (lastSentInstruction != instruction) {
+        if (instruction == 0) {
+            radio.sendValue("fs", 0)
+        } else if (instruction == 1) {
+            radio.sendValue("fs", buttonForwardSpeed)
+        } else if (instruction == 2) {
+            radio.sendValue("fs", -1 * buttonForwardSpeed)
+        } else if (instruction == 3) {
+            radio.sendValue("dir", -1 * buttonSteeringSpeed)
+        } else {
+            radio.sendValue("dir", buttonSteeringSpeed)
+        }
+        lastSentInstruction = instruction
     }
 }
 WSJoyStick.onKey(KEY.A, function () {
@@ -63,6 +71,8 @@ WSJoyStick.onKey(KEY.E, function () {
 })
 function endRecording () {
     isRecording = false
+    recordingList.push(0)
+    recordingList.push(0)
     recordingList.push(0)
 }
 WSJoyStick.onKey(KEY.D, function () {
@@ -91,19 +101,29 @@ WSJoyStick.onKey(KEY.C, function () {
 let steeringSpeed = 0
 let instruction = 0
 let playIndex = 0
+let lastSentInstruction = 0
 let recordingList: number[] = []
 let isPlaying = false
 let isRecording = false
-let recordingCycles = 0
 let steeringMode = false
-steeringMode = false
-let isStopped = true
+let buttonSteeringSpeed = 0
+let buttonForwardSpeed = 0
+let recordingCyclesTemp = 0
+let recordingCyclesTurning = 0
+let recordingCyclesForward = 0
+// These are for steering mode
 let straightSpeed = 30
 let maxSteeringSpeed = 50
 let steeringDeadzone = 20
-recordingCycles = 30
+recordingCyclesForward = 50
+recordingCyclesTurning = 30
+recordingCyclesTemp = 0
+buttonForwardSpeed = 35
+buttonSteeringSpeed = 35
 radio.setGroup(31)
 WSJoyStick.JoyStickInit()
+steeringMode = false
+let isStopped = true
 updateScreen()
 basic.forever(function () {
     if (!(steeringMode)) {

@@ -4,7 +4,8 @@
     "dependencies": {
         "core": "*",
         "radio": "*",
-        "WSJoyStick": "github:waveshare/joystick#e090d95944ae0fc614f708461498dbf875ef1243"
+        "WSJoyStick": "github:waveshare/joystick#e090d95944ae0fc614f708461498dbf875ef1243",
+        "microphone": "*"
     },
     "files": [
         "main.blocks",
