@@ -1,29 +1,40 @@
-WSJoyStick.onKey(KEY.F, function () {
+Kitronik_Game_Controller.onButtonPress(Kitronik_Game_Controller.ControllerButtonPins.Right, Kitronik_Game_Controller.ControllerButtonEvents.Click, function () {
     if (!(steeringMode)) {
         if (isRecording) {
-            pushToRecordingList(3)
+            pushToRecordingList(4)
+            talkDirection(4)
         }
     }
 })
 function updateScreen () {
-    if (steeringMode) {
-        basic.showIcon(IconNames.Triangle)
+    if (isRecording) {
+        basic.showLeds(`
+            . . . . .
+            . # # # .
+            . # . # .
+            . # # # .
+            . . . . .
+            `)
+    } else if (isPlaying) {
+        basic.showLeds(`
+            . # . . .
+            . # # . .
+            . # # # .
+            . # # . .
+            . # . . .
+            `)
     } else {
-        if (isRecording) {
-            basic.showIcon(IconNames.Target)
-        } else if (isPlaying) {
-            basic.showLeds(`
-                . # . . .
-                . # # . .
-                . # # # .
-                . # # . .
-                . # . . .
-                `)
-        } else {
-            basic.showIcon(IconNames.SmallSquare)
-        }
+        basic.showIcon(IconNames.Heart)
     }
 }
+Kitronik_Game_Controller.onButtonPress(Kitronik_Game_Controller.ControllerButtonPins.Up, Kitronik_Game_Controller.ControllerButtonEvents.Click, function () {
+    if (!(steeringMode)) {
+        if (isRecording) {
+            pushToRecordingList(1)
+            talkDirection(1)
+        }
+    }
+})
 function pushToRecordingList (instruction: number) {
     if (instruction > 2) {
         recordingCyclesTemp = recordingCyclesTurning
@@ -34,8 +45,25 @@ function pushToRecordingList (instruction: number) {
         recordingList.push(instruction)
     }
 }
+Kitronik_Game_Controller.onButtonPress(Kitronik_Game_Controller.ControllerButtonPins.Down, Kitronik_Game_Controller.ControllerButtonEvents.Click, function () {
+    steeringMode = !(steeringMode)
+    updateScreen()
+})
+input.onButtonPressed(Button.A, function () {
+    Kitronik_Game_Controller.runMotor(40)
+    if (!(steeringMode)) {
+        if (isRecording) {
+            endRecording()
+        } else {
+            isRecording = true
+            isPlaying = false
+            recordingList = []
+        }
+        updateScreen()
+    }
+})
 function translateInstruction (instruction: number) {
-    if (lastSentInstruction != instruction) {
+    if (instruction == 0 || lastSentInstruction != instruction) {
         if (instruction == 0) {
             radio.sendValue("fs", 0)
         } else if (instruction == 1) {
@@ -50,39 +78,14 @@ function translateInstruction (instruction: number) {
         lastSentInstruction = instruction
     }
 }
-WSJoyStick.onKey(KEY.A, function () {
-    if (!(steeringMode)) {
-        if (isRecording) {
-            endRecording()
-        } else {
-            isRecording = true
-            isPlaying = false
-            recordingList = []
-        }
-        updateScreen()
-    }
-})
-WSJoyStick.onKey(KEY.E, function () {
-    if (!(steeringMode)) {
-        if (isRecording) {
-            pushToRecordingList(1)
-        }
-    }
-})
 function endRecording () {
     isRecording = false
     recordingList.push(0)
     recordingList.push(0)
     recordingList.push(0)
 }
-WSJoyStick.onKey(KEY.D, function () {
-    if (!(steeringMode)) {
-        if (isRecording) {
-            pushToRecordingList(4)
-        }
-    }
-})
-WSJoyStick.onKey(KEY.B, function () {
+input.onButtonPressed(Button.B, function () {
+    Kitronik_Game_Controller.runMotor(60)
     if (!(steeringMode)) {
         if (isPlaying) {
             isPlaying = false
@@ -94,11 +97,23 @@ WSJoyStick.onKey(KEY.B, function () {
         updateScreen()
     }
 })
-WSJoyStick.onKey(KEY.C, function () {
-    steeringMode = !(steeringMode)
-    updateScreen()
+Kitronik_Game_Controller.onButtonPress(Kitronik_Game_Controller.ControllerButtonPins.Left, Kitronik_Game_Controller.ControllerButtonEvents.Click, function () {
+    if (!(steeringMode)) {
+        if (isRecording) {
+            pushToRecordingList(3)
+            talkDirection(3)
+        }
+    }
 })
-let steeringSpeed = 0
+function talkDirection (instruction: number) {
+    if (instruction == 1) {
+        radio.sendValue("robot", 1)
+    } else if (instruction == 3) {
+        radio.sendValue("robot", 2)
+    } else if (instruction == 4) {
+        radio.sendValue("robot", 3)
+    }
+}
 let instruction = 0
 let playIndex = 0
 let lastSentInstruction = 0
@@ -121,7 +136,6 @@ recordingCyclesTemp = 0
 buttonForwardSpeed = 35
 buttonSteeringSpeed = 35
 radio.setGroup(31)
-WSJoyStick.JoyStickInit()
 steeringMode = false
 let isStopped = true
 updateScreen()
@@ -137,39 +151,16 @@ basic.forever(function () {
                 translateInstruction(instruction)
             }
         } else if (!(isRecording)) {
-            if (WSJoyStick.Listen_Key(KEY.E)) {
+            if (Kitronik_Game_Controller.buttonIsPressed(Kitronik_Game_Controller.ControllerButtonPins.Up)) {
                 instruction = 1
-            } else if (WSJoyStick.Listen_Key(KEY.F)) {
+            } else if (Kitronik_Game_Controller.buttonIsPressed(Kitronik_Game_Controller.ControllerButtonPins.Left)) {
                 instruction = 3
-            } else if (WSJoyStick.Listen_Key(KEY.D)) {
+            } else if (Kitronik_Game_Controller.buttonIsPressed(Kitronik_Game_Controller.ControllerButtonPins.Right)) {
                 instruction = 4
             } else {
                 instruction = 0
             }
             translateInstruction(instruction)
-        }
-    }
-})
-basic.forever(function () {
-    if (WSJoyStick.Listen_Dir(DIR.U)) {
-        isStopped = false
-        updateScreen()
-    }
-    if (WSJoyStick.Listen_Dir(DIR.D)) {
-        isStopped = true
-        updateScreen()
-    }
-})
-basic.forever(function () {
-    if (steeringMode) {
-        steeringSpeed = Math.map(input.acceleration(Dimension.X), -1023, 1023, maxSteeringSpeed * -1, maxSteeringSpeed)
-        steeringSpeed = Math.round(steeringSpeed)
-        if (steeringDeadzone < Math.abs(steeringSpeed)) {
-            radio.sendValue("dir", steeringSpeed)
-        } else if (isStopped) {
-            radio.sendValue("fs", 0)
-        } else {
-            radio.sendValue("fs", straightSpeed)
         }
     }
 })

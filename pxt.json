@@ -1,11 +1,12 @@
 {
-    "name": "analog_control_final",
+    "name": "MV2_analog_control_final ",
     "description": "",
     "dependencies": {
         "core": "*",
         "radio": "*",
         "WSJoyStick": "github:waveshare/joystick#e090d95944ae0fc614f708461498dbf875ef1243",
-        "microphone": "*"
+        "microphone": "*",
+        "pxt-kitronik-game-controller": "github:kitronikltd/pxt-kitronik-game-controller#v0.0.2"
     },
     "files": [
         "main.blocks",
